@@ -4,6 +4,7 @@ use crate::{GenericPTE, PagingHandler, PagingMetaData};
 use crate::{MappingFlags, PageSize, PagingError, PagingResult, TlbFlush, TlbFlushAll};
 use core::marker::PhantomData;
 use memory_addr::{MemoryAddr, PhysAddr, PAGE_SIZE_4K};
+use axlog::*;
 
 const ENTRY_COUNT: usize = 512;
 
@@ -69,6 +70,7 @@ impl<M: PagingMetaData, PTE: GenericPTE, H: PagingHandler> PageTable64<M, PTE, H
         if !entry.is_unused() {
             return Err(PagingError::AlreadyMapped);
         }
+        info!("modify pte entry@{:x}", entry.as_mut_ptr());
         *entry = GenericPTE::new_page(target.align_down(page_size), flags, page_size.is_huge());
         Ok(TlbFlush::new(vaddr))
     }
